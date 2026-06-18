@@ -1,0 +1,17 @@
+{
+  "name": "eucoin",
+  "version": "1.0.0",
+  "description": "EUcoin ERC-20 test token — 14 supply, local Hardhat environment",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0"
+  }
+}

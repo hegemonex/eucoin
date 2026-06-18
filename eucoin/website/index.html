@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TCoin — The Future of Digital Currency</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar">
+    <div class="nav-logo"><span>⬡</span> TCoin</div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#tokenomics">Tokenomics</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#contract">Contract</a></li>
+    </ul>
+
+    <!-- WALLET AREA -->
+    <div class="nav-wallet-area">
+      <button class="btn-connect" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+
+      <!-- Profile pill — shown after connect -->
+      <div id="profilePill" class="profile-pill" style="display:none;" onclick="toggleDropdown(event)">
+        <div class="profile-avatar" id="profileAvatar">TC</div>
+        <div class="profile-info">
+          <span class="profile-addr" id="profileAddr">0x...</span>
+          <span class="profile-net">● Sepolia</span>
+        </div>
+        <span class="profile-arrow">▾</span>
+
+        <!-- Dropdown -->
+        <div class="profile-dropdown" id="profileDropdown">
+          <div class="dd-header">
+            <div class="dd-avatar" id="ddAvatar">TC</div>
+            <div>
+              <div class="dd-addr" id="ddAddr">0x...</div>
+              <div class="dd-bal" id="ddBal">— TC</div>
+            </div>
+          </div>
+          <div class="dd-sep"></div>
+          <button class="dd-btn" onclick="switchWallet(event)">🔄 Switch Wallet</button>
+          <button class="dd-btn dd-logout" onclick="disconnectWallet(event)">🔌 Disconnect</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">⬡ ERC-20 · Sepolia Testnet</div>
+      <h1>Welcome to <span class="grad">TCoin</span></h1>
+      <p class="hero-sub">A next-generation ERC-20 token built on Ethereum, designed for transparency, simplicity, and global reach.</p>
+      <div class="hero-btns">
+        <a href="#tokenomics" class="btn-primary">View Tokenomics</a>
+        <a href="#contract"   class="btn-outline">Contract Address</a>
+      </div>
+    </div>
+    <div class="hero-coin">
+      <div class="coin-outer"><div class="coin-inner">TC</div></div>
+    </div>
+  </section>
+
+  <!-- WALLET CARD (shown after connect) -->
+  <section id="walletSection" style="display:none;">
+    <div class="container">
+      <div class="wallet-card">
+        <div class="wc-icon">👛</div>
+        <div class="wc-info">
+          <p class="wc-label">Connected Wallet</p>
+          <p class="wc-addr" id="wcAddr">—</p>
+        </div>
+        <div class="wc-bal">
+          <p class="wc-label">TC Balance</p>
+          <p class="wc-amount" id="wcBal">—</p>
+        </div>
+        <div class="wc-eth">
+          <p class="wc-label">ETH Balance</p>
+          <p class="wc-amount" id="wcEth">—</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHARTS (shown after connect) -->
+  <section id="chartsSection" style="display:none;" class="section section-dark">
+    <div class="container">
+      <h2 class="section-title">Wallet <span class="grad">Analytics</span></h2>
+      <p class="section-sub">Live data from your connected wallet on Sepolia.</p>
+      <div class="charts-grid">
+
+        <div class="chart-card">
+          <h3 class="chart-title">Portfolio Breakdown</h3>
+          <p class="chart-sub">% of wallet held in each asset</p>
+          <div class="chart-wrap">
+            <canvas id="pieChart"></canvas>
+          </div>
+          <div id="pieLegend" class="pie-legend"></div>
+        </div>
+
+        <div class="chart-card">
+          <h3 class="chart-title">Transaction History</h3>
+          <p class="chart-sub">TC received &amp; sent over time</p>
+          <div class="chart-wrap">
+            <canvas id="lineChart"></canvas>
+          </div>
+          <p id="txNote" class="chart-note"></p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="container">
+      <h2 class="section-title">What is <span class="grad">TCoin?</span></h2>
+      <p class="section-sub">TCoin (TC) is a fully compliant ERC-20 token deployed on Ethereum Sepolia. Built with Solidity and Hardhat, it demonstrates core blockchain principles — transparency, immutability, and decentralisation.</p>
+      <div class="cards-grid">
+        <div class="card"><div class="card-icon">🔒</div><h3>Secure</h3><p>Built using OpenZeppelin's audited ERC-20 contracts.</p></div>
+        <div class="card"><div class="card-icon">🌍</div><h3>Global</h3><p>Anyone with an Ethereum wallet can hold and transfer TCoin.</p></div>
+        <div class="card"><div class="card-icon">⚡</div><h3>Fast</h3><p>Transactions settle in seconds with minimal gas fees.</p></div>
+        <div class="card"><div class="card-icon">📖</div><h3>Transparent</h3><p>All transactions are publicly visible on the blockchain.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOKENOMICS -->
+  <section class="section section-dark" id="tokenomics">
+    <div class="container">
+      <h2 class="section-title">Tokenomics</h2>
+      <p class="section-sub">Simple, fair, and fully transparent.</p>
+      <div class="token-grid">
+        <div class="token-stat"><p class="stat-val grad">TCoin</p><p class="stat-lbl">Token Name</p></div>
+        <div class="token-stat"><p class="stat-val grad">TC</p><p class="stat-lbl">Symbol</p></div>
+        <div class="token-stat"><p class="stat-val grad">14</p><p class="stat-lbl">Total Supply</p></div>
+        <div class="token-stat"><p class="stat-val grad">18</p><p class="stat-lbl">Decimals</p></div>
+        <div class="token-stat"><p class="stat-val grad">ERC-20</p><p class="stat-lbl">Standard</p></div>
+        <div class="token-stat"><p class="stat-val grad">Ethereum</p><p class="stat-lbl">Blockchain</p></div>
+      </div>
+      <div class="dist-box">
+        <h3>Token Distribution</h3>
+        <div class="dist-bar"><div class="dist-fill">100% — Funding Wallet</div></div>
+        <p class="dist-note">The entire supply of 14 TC was minted to the funding wallet at deployment. No tokens are reserved for team, investors, or future minting.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">TCoin follows the ERC-20 standard — the most widely adopted token interface on Ethereum.</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">01</div><h3>Smart Contract</h3><p>Written in Solidity, inheriting OpenZeppelin's ERC-20 implementation.</p></div>
+        <div class="step-arrow">→</div>
+        <div class="step"><div class="step-num">02</div><h3>Deployed on Ethereum</h3><p>Deployed to Sepolia using Hardhat and Alchemy. All 14 TC minted at deployment.</p></div>
+        <div class="step-arrow">→</div>
+        <div class="step"><div class="step-num">03</div><h3>Use Your Wallet</h3><p>Connect MetaMask to view your balance and transaction history live.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTRACT -->
+  <section class="section section-dark" id="contract">
+    <div class="container">
+      <h2 class="section-title">Contract Details</h2>
+      <p class="section-sub">Live on Sepolia testnet.</p>
+      <div class="contract-box">
+        <div class="contract-row">
+          <span class="c-label">Contract Address</span>
+          <div class="c-val-row">
+            <span class="c-val" id="contractAddr">0x6aE4DAB1f28630d2D56740cF5D8da78d5de01DBf</span>
+            <button class="btn-copy" onclick="copyAddress()">Copy</button>
+          </div>
+        </div>
+        <div class="contract-row"><span class="c-label">Network</span><span class="c-val">Ethereum Sepolia Testnet</span></div>
+        <div class="contract-row"><span class="c-label">Standard</span><span class="c-val">ERC-20 (EIP-20)</span></div>
+        <div class="contract-row"><span class="c-label">Compiler</span><span class="c-val">Solidity ^0.8.20</span></div>
+        <div class="contract-row"><span class="c-label">Framework</span><span class="c-val">Hardhat + OpenZeppelin v5</span></div>
+        <a class="btn-etherscan" href="https://sepolia.etherscan.io/token/0x6aE4DAB1f28630d2D56740cF5D8da78d5de01DBf" target="_blank">View on Etherscan ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-logo">⬡ TCoin</div>
+    <p>Built with Solidity · Hardhat · OpenZeppelin · Ethereum</p>
+    <p class="footer-note">For educational purposes on the Sepolia testnet.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
