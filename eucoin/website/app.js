@@ -524,24 +524,27 @@ function setStatus(id, html, type) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// CHATBOT
+// CHATBOT — Google Gemini AI Integration
 // ─────────────────────────────────────────────────────────────
-const chatResponses = [
-  { keys: ["what is tcoin", "what is tc", "tell me about"], answer: "TCoin (TC) is an ERC-20 token deployed on the Ethereum Sepolia testnet. It has a fixed supply of 14 TC and was built with Solidity and Hardhat for a blockchain coursework project." },
-  { keys: ["total supply", "how many"], answer: "TCoin has a total supply of 14 TC. All tokens were minted to the funding wallet at deployment — no new tokens can ever be created." },
-  { keys: ["contract address", "contract", "address"], answer: "The TCoin contract is deployed at: 0x6aE4DAB1f28630d2D56740cF5D8da78d5de01DBf on Sepolia testnet. You can view it on Etherscan." },
-  { keys: ["how to send", "send tc", "transfer"], answer: "Scroll up to the 'Send TCoin' section, enter the recipient's Ethereum address and the amount, then click 'Send TC'. MetaMask will ask you to confirm the transaction." },
-  { keys: ["how to buy", "buy tc", "purchase"], answer: "TCoin is a test token on Sepolia. You can receive TC by asking the owner to send some to your wallet using the Send TC form on this page." },
-  { keys: ["how to connect", "connect wallet", "metamask"], answer: "Click the 'Connect Wallet' button at the top right. Make sure MetaMask is installed in your browser and set to Sepolia testnet." },
-  { keys: ["sepolia", "testnet", "network"], answer: "TCoin lives on the Ethereum Sepolia testnet. You can get free Sepolia ETH from faucets like cloud.google.com/web3/faucet to pay for gas fees." },
-  { keys: ["symbol", "ticker"], answer: "TCoin's symbol is TC. You can import it to MetaMask using the contract address: 0x6aE4DAB1f28630d2D56740cF5D8da78d5de01DBf" },
-  { keys: ["decimals"], answer: "TCoin uses 18 decimal places, which is the standard for ERC-20 tokens on Ethereum." },
-  { keys: ["etherscan", "verify", "check"], answer: "You can view the TCoin contract on Sepolia Etherscan: https://sepolia.etherscan.io/token/0x6aE4DAB1f28630d2D56740cF5D8da78d5de01DBf" },
-  { keys: ["hardhat", "solidity", "built with", "tech"], answer: "TCoin was built with Solidity ^0.8.20, Hardhat, OpenZeppelin Contracts v5, and deployed using an Alchemy RPC endpoint." },
-  { keys: ["balance", "how much"], answer: "Connect your wallet and your TC balance will appear at the top of the page. Click ↻ Refresh to update after transactions." },
-  { keys: ["hello", "hi", "hey"], answer: "Hey! 👋 I'm the TCoin assistant. Ask me anything about TCoin — supply, contract, how to send, or how it was built." },
-  { keys: ["help"], answer: "I can answer questions about: total supply, contract address, how to send TC, how to connect MetaMask, the tech stack, Sepolia testnet, and more. Just ask!" },
-];
+const GEMINI_API_KEY = "AIzaSyDXJTycMU14yWJgrubRnhT017kJs65gUiI";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+
+// System context for the chatbot
+const TCOIN_CONTEXT = `You are the TCoin assistant, a helpful AI chatbot embedded on the TCoin website. TCoin is an ERC-20 token with the following details:
+- Token Name: TCoin
+- Symbol: TC
+- Total Supply: 14 TC (fixed, no new tokens can be minted)
+- Contract Address: 0x6aE4DAB1f28630d2D56740cF5D8da78d5de01DBf
+- Network: Ethereum Sepolia Testnet
+- Standard: ERC-20 (EIP-20)
+- Tech Stack: Solidity ^0.8.20, Hardhat, OpenZeppelin Contracts v5
+- All 14 TC were minted to the funding wallet at deployment
+- Users can view balance, send TC, and see transaction history on the website
+- Users must connect MetaMask wallet (set to Sepolia) to interact with the token
+- Sepolia ETH is needed for gas fees (available from faucets like cloud.google.com/web3/faucet)
+- Etherscan link: https://sepolia.etherscan.io/token/0x6aE4DAB1f28630d2D56740cF5D8da78d5de01DBf
+
+Answer user questions about TCoin, how to use it, technical details, and the website features. Keep responses concise and friendly. If asked about topics unrelated to TCoin or crypto, politely redirect to TCoin-related questions.`;
 
 function toggleChat() {
   const win = document.getElementById("chatWindow");
@@ -553,7 +556,7 @@ function toggleChat() {
   }
 }
 
-function sendChat() {
+async function sendChat() {
   const input = document.getElementById("chatInput");
   if (!input) return;
   const msg = input.value.trim();
@@ -562,10 +565,28 @@ function sendChat() {
   addChatMsg(msg, "user");
   input.value = "";
 
-  setTimeout(() => {
-    const reply = getBotReply(msg);
+  // Show typing indicator
+  addChatMsg("...", "bot typing");
+
+  try {
+    const reply = await getAIReply(msg);
+    // Remove typing indicator
+    const box = document.getElementById("chatMessages");
+    if (box) {
+      const typing = box.querySelector(".chat-msg.typing");
+      if (typing) typing.remove();
+    }
     addChatMsg(reply, "bot");
-  }, 400);
+  } catch (err) {
+    console.error("AI reply error:", err);
+    // Remove typing indicator
+    const box = document.getElementById("chatMessages");
+    if (box) {
+      const typing = box.querySelector(".chat-msg.typing");
+      if (typing) typing.remove();
+    }
+    addChatMsg("Sorry, I'm having trouble connecting right now. Please try again in a moment.", "bot");
+  }
 }
 
 function addChatMsg(text, type) {
@@ -578,12 +599,40 @@ function addChatMsg(text, type) {
   box.scrollTop = box.scrollHeight;
 }
 
-function getBotReply(msg) {
-  const lower = msg.toLowerCase();
-  for (const r of chatResponses) {
-    if (r.keys.some(k => lower.includes(k))) return r.answer;
+async function getAIReply(userMsg) {
+  const payload = {
+    contents: [
+      {
+        parts: [
+          { text: TCOIN_CONTEXT },
+          { text: `User question: ${userMsg}` }
+        ]
+      }
+    ],
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 300,
+    }
+  };
+
+  const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Gemini API error: ${response.status}`);
   }
-  return "I'm not sure about that. Try asking about: total supply, contract address, how to send TC, MetaMask connection, or the tech stack.";
+
+  const data = await response.json();
+  
+  // Extract text from Gemini response
+  if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+    return data.candidates[0].content.parts[0].text || "I couldn't generate a response. Please try again.";
+  }
+  
+  return "I couldn't understand that. Could you rephrase your question?";
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -656,4 +705,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.ethereum.on("chainChanged", () => location.reload());
   }
 });
+
 
