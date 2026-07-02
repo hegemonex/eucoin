@@ -615,24 +615,32 @@ async function getAIReply(userMsg) {
     }
   };
 
-  const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  try {
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-  if (!response.ok) {
-    throw new Error(`Gemini API error: ${response.status}`);
-  }
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Gemini API error:", response.status, errorData);
+      throw new Error(`Gemini API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+    }
 
-  const data = await response.json();
-  
-  // Extract text from Gemini response
-  if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-    return data.candidates[0].content.parts[0].text || "I couldn't generate a response. Please try again.";
+    const data = await response.json();
+    console.log("Gemini API response:", data);
+    
+    // Extract text from Gemini response
+    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+      return data.candidates[0].content.parts[0].text || "I couldn't generate a response. Please try again.";
+    }
+    
+    return "I couldn't understand that. Could you rephrase your question?";
+  } catch (error) {
+    console.error("Full error details:", error);
+    throw error;
   }
-  
-  return "I couldn't understand that. Could you rephrase your question?";
 }
 
 // ─────────────────────────────────────────────────────────────
