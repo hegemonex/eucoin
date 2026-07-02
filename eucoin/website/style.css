@@ -147,6 +147,15 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .wc-addr  { font-family: monospace; font-size: 0.85rem; word-break: break-all; }
 .wc-amount { font-size: 1.6rem; font-weight: 700; }
 
+.btn-refresh {
+  padding: 8px 18px; border-radius: 8px; cursor: pointer;
+  font-size: 0.85rem; font-weight: 600;
+  background: rgba(124,58,237,0.15); color: #a78bfa;
+  border: 1px solid var(--primary); transition: opacity .2s;
+  white-space: nowrap;
+}
+.btn-refresh:hover { opacity: 0.8; }
+
 /* ── Sections ────────────────────────────────────────────── */
 .section { padding: 80px 40px; }
 .section-dark { background: var(--bg2); }
@@ -181,8 +190,8 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .card p  { color: var(--muted); font-size: .9rem; }
 
 /* ── Tokenomics ──────────────────────────────────────────── */
-.token-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 24px; margin-bottom: 48px; }
-.token-stat { text-align: center; padding: 28px 16px; background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); }
+.token-grid { display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 48px; justify-content: center; }
+.token-stat { text-align: center; padding: 28px 32px; background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); flex: 1; min-width: 140px; max-width: 200px; }
 .stat-val { font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; }
 .stat-lbl { font-size: .8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
 .dist-box { padding: 32px; background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); }

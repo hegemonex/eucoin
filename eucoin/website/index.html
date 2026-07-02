@@ -21,10 +21,10 @@
 
     <!-- WALLET AREA -->
     <div class="nav-wallet-area">
-      <button class="btn-connect" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+      <button class="btn-connect" id="connectBtn">Connect Wallet</button>
 
       <!-- Profile pill — shown after connect -->
-      <div id="profilePill" class="profile-pill" style="display:none;" onclick="toggleDropdown(event)">
+      <div id="profilePill" class="profile-pill" style="display:none;">
         <div class="profile-avatar" id="profileAvatar">TC</div>
         <div class="profile-info">
           <span class="profile-addr" id="profileAddr">0x...</span>
@@ -42,8 +42,8 @@
             </div>
           </div>
           <div class="dd-sep"></div>
-          <button class="dd-btn" onclick="switchWallet(event)">🔄 Switch Wallet</button>
-          <button class="dd-btn dd-logout" onclick="disconnectWallet(event)">🔌 Disconnect</button>
+          <button class="dd-btn">🔄 Switch Wallet</button>
+          <button class="dd-btn dd-logout">🔌 Disconnect</button>
         </div>
       </div>
     </div>
@@ -82,12 +82,13 @@
           <p class="wc-label">ETH Balance</p>
           <p class="wc-amount" id="wcEth">—</p>
         </div>
+        <button class="btn-refresh" id="refreshBtn" onclick="refreshBalances()">↻ Refresh</button>
       </div>
     </div>
   </section>
 
   <!-- CHARTS (shown after connect) -->
-  <section id="chartsSection" style="display:none;" class="section section-dark">
+  <section id="chartsSection" class="section section-dark">
     <div class="container">
       <h2 class="section-title">Wallet <span class="grad">Analytics</span></h2>
       <p class="section-sub">Live data from your connected wallet on Sepolia.</p>
@@ -175,7 +176,7 @@
           <span class="c-label">Contract Address</span>
           <div class="c-val-row">
             <span class="c-val" id="contractAddr">0x6aE4DAB1f28630d2D56740cF5D8da78d5de01DBf</span>
-            <button class="btn-copy" onclick="copyAddress()">Copy</button>
+            <button class="btn-copy">Copy</button>
           </div>
         </div>
         <div class="contract-row"><span class="c-label">Network</span><span class="c-val">Ethereum Sepolia Testnet</span></div>
