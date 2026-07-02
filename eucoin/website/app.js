@@ -84,6 +84,7 @@ function onDisconnect() {
   setDisplay("connectBtn", "inline-block");
   setDisplay("profilePill", "none");
   setDisplay("walletSection", "none");
+  setDisplay("sendSection", "none");
   if (pieInst)  { pieInst.destroy();  pieInst  = null; }
   if (lineInst) { lineInst.destroy(); lineInst = null; }
   // Rebuild demo charts
@@ -118,8 +119,10 @@ async function onConnect(account) {
     setText("wcAddr", short);
     setText("wcBal",  tc + " TC");
     setText("wcEth",  eth + " ETH");
+    setText("sendBal", tc + " TC");
 
     setDisplay("walletSection", "block");
+    setDisplay("sendSection", "block");
 
     // Rebuild charts with real data
     buildPie(parseFloat(tc), parseFloat(eth));
@@ -451,6 +454,136 @@ async function blockDate(hex) {
     blockCache[hex] = date;
     return date;
   } catch { return "Unknown"; }
+}
+
+// ─────────────────────────────────────────────────────────────
+// SEND TC
+// ─────────────────────────────────────────────────────────────
+async function sendTC() {
+  if (!currentAccount) {
+    setStatus("sendStatus", "⚠️ Please connect your wallet first.", "warn");
+    return;
+  }
+
+  const to     = document.getElementById("sendTo")?.value?.trim();
+  const amount = document.getElementById("sendAmount")?.value?.trim();
+
+  if (!to || !to.startsWith("0x") || to.length !== 42) {
+    setStatus("sendStatus", "⚠️ Enter a valid Ethereum address.", "warn");
+    return;
+  }
+  if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+    setStatus("sendStatus", "⚠️ Enter a valid amount.", "warn");
+    return;
+  }
+
+  const btn = document.getElementById("sendBtn");
+  if (btn) { btn.textContent = "Sending..."; btn.disabled = true; }
+  setStatus("sendStatus", "⏳ Waiting for MetaMask confirmation...", "info");
+
+  try {
+    // ABI-encode transfer(address,uint256)
+    const amountWei = BigInt(Math.round(parseFloat(amount) * 1e18)).toString(16).padStart(64, "0");
+    const paddedTo  = to.slice(2).padStart(64, "0");
+    const data      = "0xa9059cbb" + paddedTo + amountWei;
+
+    const txHash = await window.ethereum.request({
+      method: "eth_sendTransaction",
+      params: [{
+        from: currentAccount,
+        to:   CONTRACT,
+        data,
+      }],
+    });
+
+    setStatus("sendStatus", `✅ Sent! TX: <a href="https://sepolia.etherscan.io/tx/${txHash}" target="_blank" class="tx-link">${txHash.slice(0,18)}...</a>`, "success");
+
+    // Clear inputs
+    if (document.getElementById("sendTo"))     document.getElementById("sendTo").value = "";
+    if (document.getElementById("sendAmount")) document.getElementById("sendAmount").value = "";
+
+    // Refresh balances after 3 seconds
+    setTimeout(() => refreshBalances(), 3000);
+
+  } catch (e) {
+    if (e.code === 4001) {
+      setStatus("sendStatus", "❌ Transaction rejected.", "error");
+    } else {
+      setStatus("sendStatus", "❌ Error: " + (e.message || e), "error");
+    }
+  }
+
+  if (btn) { btn.textContent = "Send TC →"; btn.disabled = false; }
+}
+
+function setStatus(id, html, type) {
+  const node = document.getElementById(id);
+  if (!node) return;
+  node.innerHTML = html;
+  node.className = "send-status " + type;
+}
+
+// ─────────────────────────────────────────────────────────────
+// CHATBOT
+// ─────────────────────────────────────────────────────────────
+const chatResponses = [
+  { keys: ["what is tcoin", "what is tc", "tell me about"], answer: "TCoin (TC) is an ERC-20 token deployed on the Ethereum Sepolia testnet. It has a fixed supply of 14 TC and was built with Solidity and Hardhat for a blockchain coursework project." },
+  { keys: ["total supply", "how many"], answer: "TCoin has a total supply of 14 TC. All tokens were minted to the funding wallet at deployment — no new tokens can ever be created." },
+  { keys: ["contract address", "contract", "address"], answer: "The TCoin contract is deployed at: 0x6aE4DAB1f28630d2D56740cF5D8da78d5de01DBf on Sepolia testnet. You can view it on Etherscan." },
+  { keys: ["how to send", "send tc", "transfer"], answer: "Scroll up to the 'Send TCoin' section, enter the recipient's Ethereum address and the amount, then click 'Send TC'. MetaMask will ask you to confirm the transaction." },
+  { keys: ["how to buy", "buy tc", "purchase"], answer: "TCoin is a test token on Sepolia. You can receive TC by asking the owner to send some to your wallet using the Send TC form on this page." },
+  { keys: ["how to connect", "connect wallet", "metamask"], answer: "Click the 'Connect Wallet' button at the top right. Make sure MetaMask is installed in your browser and set to Sepolia testnet." },
+  { keys: ["sepolia", "testnet", "network"], answer: "TCoin lives on the Ethereum Sepolia testnet. You can get free Sepolia ETH from faucets like cloud.google.com/web3/faucet to pay for gas fees." },
+  { keys: ["symbol", "ticker"], answer: "TCoin's symbol is TC. You can import it to MetaMask using the contract address: 0x6aE4DAB1f28630d2D56740cF5D8da78d5de01DBf" },
+  { keys: ["decimals"], answer: "TCoin uses 18 decimal places, which is the standard for ERC-20 tokens on Ethereum." },
+  { keys: ["etherscan", "verify", "check"], answer: "You can view the TCoin contract on Sepolia Etherscan: https://sepolia.etherscan.io/token/0x6aE4DAB1f28630d2D56740cF5D8da78d5de01DBf" },
+  { keys: ["hardhat", "solidity", "built with", "tech"], answer: "TCoin was built with Solidity ^0.8.20, Hardhat, OpenZeppelin Contracts v5, and deployed using an Alchemy RPC endpoint." },
+  { keys: ["balance", "how much"], answer: "Connect your wallet and your TC balance will appear at the top of the page. Click ↻ Refresh to update after transactions." },
+  { keys: ["hello", "hi", "hey"], answer: "Hey! 👋 I'm the TCoin assistant. Ask me anything about TCoin — supply, contract, how to send, or how it was built." },
+  { keys: ["help"], answer: "I can answer questions about: total supply, contract address, how to send TC, how to connect MetaMask, the tech stack, Sepolia testnet, and more. Just ask!" },
+];
+
+function toggleChat() {
+  const win = document.getElementById("chatWindow");
+  if (!win) return;
+  win.style.display = win.style.display === "none" ? "flex" : "none";
+  if (win.style.display === "flex") {
+    const input = document.getElementById("chatInput");
+    if (input) input.focus();
+  }
+}
+
+function sendChat() {
+  const input = document.getElementById("chatInput");
+  if (!input) return;
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  addChatMsg(msg, "user");
+  input.value = "";
+
+  setTimeout(() => {
+    const reply = getBotReply(msg);
+    addChatMsg(reply, "bot");
+  }, 400);
+}
+
+function addChatMsg(text, type) {
+  const box = document.getElementById("chatMessages");
+  if (!box) return;
+  const div = document.createElement("div");
+  div.className = "chat-msg " + type;
+  div.textContent = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function getBotReply(msg) {
+  const lower = msg.toLowerCase();
+  for (const r of chatResponses) {
+    if (r.keys.some(k => lower.includes(k))) return r.answer;
+  }
+  return "I'm not sure about that. Try asking about: total supply, contract address, how to send TC, MetaMask connection, or the tech stack.";
 }
 
 // ─────────────────────────────────────────────────────────────

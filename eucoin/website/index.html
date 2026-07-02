@@ -116,6 +116,34 @@
     </div>
   </section>
 
+  <!-- SEND TC SECTION (shown after connect) -->
+  <section id="sendSection" style="display:none;" class="section">
+    <div class="container">
+      <h2 class="section-title">Send <span class="grad">TCoin</span></h2>
+      <p class="section-sub">Transfer TC directly to any Ethereum address on Sepolia.</p>
+      <div class="send-box">
+        <div class="send-form">
+          <div class="send-field">
+            <label class="send-label">Recipient Address</label>
+            <input type="text" id="sendTo" class="send-input" placeholder="0x..." />
+          </div>
+          <div class="send-field">
+            <label class="send-label">Amount (TC)</label>
+            <input type="number" id="sendAmount" class="send-input" placeholder="0.0" min="0" step="0.01" />
+          </div>
+          <button class="btn-send" id="sendBtn" onclick="sendTC()">Send TC →</button>
+          <p class="send-status" id="sendStatus"></p>
+        </div>
+        <div class="send-info">
+          <div class="send-info-row"><span>Your Balance</span><span id="sendBal">— TC</span></div>
+          <div class="send-info-row"><span>Network</span><span>Sepolia Testnet</span></div>
+          <div class="send-info-row"><span>Token</span><span>TCoin (TC)</span></div>
+          <div class="send-info-row"><span>Contract</span><span class="send-contract">0x6aE4...DBf</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ABOUT -->
   <section class="section" id="about">
     <div class="container">
@@ -187,6 +215,28 @@
       </div>
     </div>
   </section>
+
+  <!-- CHATBOT -->
+  <div class="chat-bubble" id="chatBubble" onclick="toggleChat()">💬</div>
+  <div class="chat-window" id="chatWindow" style="display:none;">
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-avatar">TC</div>
+        <div>
+          <p class="chat-name">TCoin Assistant</p>
+          <p class="chat-status">● Online</p>
+        </div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg bot">👋 Hi! I'm the TCoin assistant. Ask me anything about TCoin, how to buy, send, or the contract details.</div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" class="chat-input" placeholder="Ask something..." onkeydown="if(event.key==='Enter') sendChat()" />
+      <button class="chat-send-btn" onclick="sendChat()">➤</button>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <footer class="footer">
