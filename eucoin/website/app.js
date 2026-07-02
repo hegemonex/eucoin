@@ -527,7 +527,7 @@ function setStatus(id, html, type) {
 // CHATBOT — Google Gemini AI Integration
 // ─────────────────────────────────────────────────────────────
 const GEMINI_API_KEY = "AIzaSyDXJTycMU14yWJgrubRnhT017kJs65gUiI";
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent";
 
 // System context for the chatbot
 const TCOIN_CONTEXT = `You are the TCoin assistant, a helpful AI chatbot embedded on the TCoin website. TCoin is an ERC-20 token with the following details:
